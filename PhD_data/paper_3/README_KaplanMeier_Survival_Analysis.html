@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>README: Kaplan-Meier Survival Analysis for C. elegans</title>
+</head>
+<body>
+
+<h1>README: Kaplan-Meier Survival Analysis for <i>C. elegans</i></h1>
+
+<p>This repository provides tools to perform Kaplan-Meier survival analysis on your <i>C. elegans</i> lifespan data and generate informative plots. Even with minimal Python knowledge, you can follow these steps to analyze your data.</p>
+
+<h2>1. Prepare your data:</h2>
+
+<ul>
+  <li>Open the <code>c_elegans_data_template.csv</code> file in a spreadsheet program (like Excel or Google Sheets).</li>
+  <li><b>For each experimental group, time point, and replicate:</b>
+    <ul>
+      <li>Enter the number of dead worms in the "Dead" column.</li>
+      <li>Enter the initial total number of worms in the "Total" column.</li>
+    </ul>
+  </li>
+  <li><b>Important:</b> Make sure your time points are in hours.</li>
+  <li>Save the file after entering your data.</li>
+</ul>
+
+<h3>Example:</h3>
+
+<p>Instead of a table, I'll provide a formatted list:</p>
+<ul>
+  <li><b>Group:</b> Control, <b>Time:</b> 0, <b>Replicate:</b> Rep1, <b>Dead:</b> 2, <b>Total:</b> 50</li>
+  <li><b>Group:</b> Control, <b>Time:</b> 24, <b>Replicate:</b> Rep1, <b>Dead:</b> 5, <b>Total:</b> 50</li>
+  <li><b>Group:</b> Group1, <b>Time:</b> 0, <b>Replicate:</b> Rep1, <b>Dead:</b> 3, <b>Total:</b> 50</li>
+  <li><b>Group:</b> Group1, <b>Time:</b> 24, <b>Replicate:</b> Rep1, <b>Dead:</b> 8, <b>Total:</b> 50</li>
+</ul>
+
+<h2>2. Run the Python script:</h2>
+
+<ul>
+  <li>Make sure you have Python installed on your computer.</li>
+  <li>You'll also need to install the required Python packages (<code>pandas</code>, <code>lifelines</code>, <code>matplotlib</code>). You can do this by running the command <code>pip install pandas lifelines matplotlib</code> in your terminal or command prompt.</li>
+  <li>Place your filled-in CSV file and the <code>KaplanMeier_script.py</code> script in the same folder.</li>
+  <li>Open a terminal or command prompt, navigate to that folder, and run the script using the command <code>python KaplanMeier_script.py</code>.</li>
+</ul>
+
+<h2>3. Interpret the results:</h2>
+
+<ul>
+  <li>The script will generate a plot with two subplots:
+    <ul>
+      <li><b>A:</b> Kaplan-Meier curves for all groups.</li>
+      <li><b>B:</b> Kaplan-Meier curves for groups that are statistically significantly different from the control group.</li>
+    </ul>
+  </li>
+  <li>The script will also print the p-values of the log-rank tests, which compare each group to the control group.</li>
+</ul>
+
+<h2>Key points:</h2>
+
+<ul>
+  <li>The Kaplan-Meier curves show the probability of survival over time for each group.</li>
+  <li>The log-rank test determines if there are significant differences in survival between groups.</li>
+  <li>A p-value less than 0.05 indicates a statistically significant difference.</li>
+</ul>
+
+<p>This README provides a basic guide for using the provided scripts. With a little effort, you can use these tools to gain valuable insights from your <i>C. elegans</i> survival data.</p>
+
+</body>
+</html>
