@@ -113,26 +113,26 @@ df['censored'] = df['total'] - df['dead']
 fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(12, 16))
 
 # Define colors for each group
-colors = ['blue', 'red', 'green', 'orange', 'purple', 'brown', 'pink', 'gray', 'cyan']
+colors = ['blue', 'red', 'green', 'orange', 'purple', 'pink', 'brown', 'gray', 'cyan']
 
 # Perform Kaplan-Meier analysis and log-rank tests
 significant_groups = set()
 groups = df['group'].unique()
-eoc_group = 'EoC'  # Adjust this if your EoC group has a different name
+control_group = 'Control'  # Set the control group
 for group in groups:
-    if group != eoc_group:
+    if group != control_group:
         group_data = df[df['group'] == group]
-        eoc_data = df[df['group'] == eoc_group]
+        control_data = df[df['group'] == control_group]
         
         T1 = np.repeat(group_data['time'].values, group_data['dead'].values)
         E1 = np.ones_like(T1)
-        T2 = np.repeat(eoc_data['time'].values, eoc_data['dead'].values)
+        T2 = np.repeat(control_data['time'].values, control_data['dead'].values)
         E2 = np.ones_like(T2)
         
         result = logrank_test(T1, T2, E1, E2)
         if result.p_value < 0.05:
             significant_groups.add(group)
-        print(f"Log-rank test {group} vs {eoc_group}: p-value = {result.p_value:.4f}")
+        print(f"Log-rank test {group} vs {control_group}: p-value = {result.p_value:.4f}")
 
 # Plot Kaplan-Meier curves
 for i, group in enumerate(groups):
@@ -150,9 +150,15 @@ for i, group in enumerate(groups):
     # Plot on the first subplot (all curves)
     kmf.plot(ax=ax1, ci_show=True, color=colors[i])
     
-    # Plot on the second subplot (only significant curves and EoC)
-    if group in significant_groups or group == eoc_group:
+    # Plot on the second subplot (only significant curves and Control)
+    if group in significant_groups or group == control_group:
         kmf.plot(ax=ax2, ci_show=True, color=colors[i])
+
+# Function to format y-axis as percentage
+def format_y_axis_as_percentage(ax):
+    ax.set_ylim(0, 1)  # Ensure the y-axis goes from 0 to 1
+    ax.yaxis.set_major_formatter(plt.FuncFormatter(lambda y, _: '{:.0f}'.format(y*100)))
+    ax.set_yticks([0, 0.25, 0.5, 0.75, 1])  # Set ticks at 0, 25, 50, 75, 100
 
 # Customize the first subplot (all curves)
 ax1.set_title('A', loc='left', pad=10)
@@ -160,13 +166,15 @@ ax1.set_xlabel('Time (hours)')
 ax1.set_ylabel('Survival Probability (%)')
 ax1.grid(True)
 ax1.legend(title='All Groups', loc='center left', bbox_to_anchor=(1, 0.5))
+format_y_axis_as_percentage(ax1)
 
 # Customize the second subplot (significant curves)
 ax2.set_title('B', loc='left', pad=10)
 ax2.set_xlabel('Time (hours)')
 ax2.set_ylabel('Survival Probability (%)')
 ax2.grid(True)
-ax2.legend(title='Sig* Groups (p < 0.05 vs EoC)', loc='upper left', bbox_to_anchor=(1, 0.5))
+ax2.legend(title='Significant Groups*', loc='center left', bbox_to_anchor=(1, 0.5))
+format_y_axis_as_percentage(ax2)
 
 # Add a main title to the figure
 fig.suptitle('', fontsize=16)
