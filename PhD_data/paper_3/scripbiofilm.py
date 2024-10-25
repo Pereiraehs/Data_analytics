@@ -88,10 +88,10 @@ print(statistics['C. albicans'])
 
 # Create figure
 fig = plt.figure(figsize=(20, 20))
-fig.suptitle('Biofilm Inhibition by Biopolymer Blend Composition', fontsize=16)
+fig.suptitle('', fontsize=16)
 
 # Create GridSpec
-gs = GridSpec(2, 2, figure=fig, height_ratios=[1, 1], hspace=0.4, wspace=0.3)
+gs = GridSpec(2, 2, figure=fig, height_ratios=[1, 1], hspace=0.6, wspace=0.3)
 
 # Create subplots
 axes = [fig.add_subplot(gs[0, 0]),
