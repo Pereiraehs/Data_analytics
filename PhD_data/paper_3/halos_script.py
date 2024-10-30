@@ -4,6 +4,17 @@ import seaborn as sns
 from scipy import stats
 import pandas as pd
 
+# Set global font sizes - reduced sizes
+plt.rcParams.update({
+    'font.size': 10,          # Reduced from 14
+    'axes.titlesize': 12,     # Reduced from 16
+    'axes.labelsize': 10,     # Reduced from 14
+    'xtick.labelsize': 8,     # Reduced from 12
+    'ytick.labelsize': 8,     # Reduced from 12
+    'legend.fontsize': 8,     # Reduced from 12
+    'figure.titlesize': 12    # Reduced from 16
+})
+
 # Essential oil names
 essential_oils = ['Lem', 'Clo', 'Gin', 'Euc', 'Thy', 'Cin', 'IS'] 
 
@@ -74,38 +85,6 @@ df = pd.DataFrame([
     for oil, data in oils_data.items()
     for value in data['S_aureus']
 ])
-
-# Create a figure with two subplots
-plt.figure(figsize=(15, 10))
-
-# 1. Distribution plot
-plt.subplot(2, 1, 1)
-sns.kdeplot(data=df, x='Halo', hue='Bacteria', fill=True, common_norm=False)
-plt.xlabel('Inhibition Halo (mm)')
-plt.ylabel('Density')
-plt.title('Distribution of Inhibition Halos by Bacteria')
-plt.grid(True, linestyle='--', alpha=0.7)
-
-# 2. Heatmap
-plt.subplot(2, 1, 2)
-# Create matrix for heatmap
-heatmap_data = pd.DataFrame({
-    'E. coli': [np.mean(oils_data[oil]['E_coli']) for oil in oils_data],
-    'S. aureus': [np.mean(oils_data[oil]['S_aureus']) for oil in oils_data]
-}, index=oils_data.keys())
-
-# Create regular heatmap
-sns.heatmap(heatmap_data, 
-            annot=True,
-            fmt='.2f',
-            cmap='YlOrRd',
-            cbar_kws={'label': 'Inhibition Halo (mm)'},
-            center=np.mean(df['Halo']))
-
-plt.title('Heatmap of Mean Inhibition Halos', pad=20)
-plt.tight_layout()
-plt.show()
-
 # Print statistical summary
 print("\nStatistical Analysis (E. coli vs S. aureus for each oil):")
 for oil in oils_data:
@@ -124,42 +103,11 @@ for oil in oils_data:
     print(f"E. coli: {means[oil]['E_coli']:.2f} ± {std_devs[oil]['E_coli']:.2f} mm")
     print(f"S. aureus: {means[oil]['S_aureus']:.2f} ± {std_devs[oil]['S_aureus']:.2f} mm")
 
-# Create visualizations
-plt.figure(figsize=(15, 10))
-
-# 1. Bar plot with error bars
-plt.subplot(2, 1, 1)
-x = np.arange(len(oils_data))
-width = 0.35
-
-e_coli_means = [means[oil]['E_coli'] for oil in oils_data]
-s_aureus_means = [means[oil]['S_aureus'] for oil in oils_data]
-e_coli_std = [std_devs[oil]['E_coli'] for oil in oils_data]
-s_aureus_std = [std_devs[oil]['S_aureus'] for oil in oils_data]
-
-plt.bar(x - width/2, e_coli_means, width, label='E. coli', 
-        yerr=e_coli_std, capsize=5, color='skyblue')
-plt.bar(x + width/2, s_aureus_means, width, label='S. aureus', 
-        yerr=s_aureus_std, capsize=5, color='lightcoral')
-
-plt.xlabel('Essential Oils')
-plt.ylabel('Inhibition Halo (mm)')
-plt.title('Inhibition Halos by Essential Oil and Bacteria')
-plt.xticks(x, list(oils_data.keys()))
-plt.legend()
-plt.grid(True, linestyle='--', alpha=0.7)
-
-# 2. Box plot
-plt.subplot(2, 1, 2)
-sns.boxplot(data=df, x='Oil', y='Halo', hue='Bacteria', 
-            palette={'E. coli': 'skyblue', 'S. aureus': 'lightcoral'})
-plt.xlabel('Essential Oils')
-plt.ylabel('Inhibition Halo (mm)')
-plt.title('Distribution of Inhibition Halos')
-plt.grid(True, linestyle='--', alpha=0.7)
-
-plt.tight_layout()
-plt.show()
+# Create heatmap data before the plotting section
+heatmap_data = pd.DataFrame({
+    r'$\it{E. coli}$': [means[oil]['E_coli'] for oil in essential_oils[:-1]],  # Excluding 'IS'
+    r'$\it{S. aureus}$': [means[oil]['S_aureus'] for oil in essential_oils[:-1]]  # Excluding 'IS'
+}, index=essential_oils[:-1])
 
 # Create DataFrame for box plot
 df = pd.DataFrame([
@@ -172,44 +120,58 @@ df = pd.DataFrame([
     for value in data['S_aureus']
 ])
 
-# Create figure with two subplots
-plt.figure(figsize=(15, 10))
+# Create figure with publication-standard size and resolution
+plt.figure(figsize=(6, 5))  # Added dpi parameter
 
 # 1. Box plot
 plt.subplot(2, 1, 1)
-# Create box plot
 ax = sns.boxplot(data=df, x='Oil', y='Halo', hue='Bacteria', 
-                 palette={r'$\it{E. coli}$': 'lightgray', r'$\it{S. aureus}$': 'lightgray'})
+                 palette={r'$\it{E. coli}$': 'lightgray', r'$\it{S. aureus}$': 'lightgray'},
+                 width=0.7,    # Standard width
+                 linewidth=1)  # Clear lines
+
+# Add grid
+plt.grid(True, axis='y', linestyle='--', alpha=0.7)  # Add horizontal grid lines with dashed style
 
 # Highlight Cinnamon boxes
 cin_data = df[df['Oil'] == 'Cin']
 sns.boxplot(data=cin_data, x='Oil', y='Halo', hue='Bacteria',
-            palette={r'$\it{E. coli}$': 'skyblue', r'$\it{S. aureus}$': 'lightcoral'})
+            palette={r'$\it{E. coli}$': 'skyblue', r'$\it{S. aureus}$': 'lightcoral'},
+            width=0.7,
+            linewidth=1)
 
-plt.xlabel('Essential Oils')
-plt.ylabel('Inhibition Halo (mm)')
-plt.title('A', pad=20, loc='left')
-plt.grid(True, linestyle='--', alpha=0.7)
-plt.legend(bbox_to_anchor=(1.01, 1), loc='upper left')
+plt.xlabel('Essential Oils', fontsize=16)
+plt.ylabel('Inhibition Zone (mm)', fontsize=16)
+plt.title('A', pad=5, loc='left', fontsize=16)
+plt.xticks(fontsize=14)
+plt.yticks(fontsize=14)
+
+# Legend with standard formatting
+plt.legend(title=None, bbox_to_anchor=(1.01, 0.5), 
+          loc='center left', fontsize=12, 
+          handletextpad=0.5,
+          handlelength=1.5)
 
 # 2. Heatmap
 plt.subplot(2, 1, 2)
-# Create matrix for heatmap
-heatmap_data = pd.DataFrame({
-    r'$\it{E. coli}$': [np.mean(oils_data[oil]['E_coli']) for oil in oils_data],
-    r'$\it{S. aureus}$': [np.mean(oils_data[oil]['S_aureus']) for oil in oils_data]
-}, index=oils_data.keys())
-
-# Create regular heatmap
-sns.heatmap(heatmap_data, 
+hm = sns.heatmap(heatmap_data, 
             annot=True,
-            fmt='.2f',
+            fmt='.1f',
             cmap='YlOrRd',
-            cbar_kws={'label': 'Inhibition Halo (mm)'},
-            center=np.mean(df['Halo']))
+            cbar_kws={'label': 'Inhibition Zone (mm)'},
+            center=np.mean(df['Halo']),
+            annot_kws={'size': 16})
 
-plt.title('B', pad=20, loc='left')
-plt.tight_layout()
+plt.title('B', pad=5, loc='left', fontsize=16)
+plt.xticks(fontsize=16)
+plt.yticks(fontsize=16, rotation=0)
+
+# Adjust colorbar label and tick label sizes
+cbar = hm.collections[0].colorbar
+cbar.ax.tick_params(labelsize=16)  # Change this value to adjust the tick label size
+plt.gcf().axes[-1].yaxis.label.set_size(16)
+
+# Save with publication-quality settings
 plt.show()
 
 
