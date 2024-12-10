@@ -37,18 +37,123 @@ def remove_outliers(df):
     upper_bound = Q3 + 1.5 * IQR
     return df[(df >= lower_bound) & (df <= upper_bound)]
 
-filename = '/home/m/Data_analytics/PhD_data/paper_3/Anti-biofilm_.ods'
+def create_box_visualization(statistics):
+    # Prepare data for box plots
+    all_data = []
+    labels = []
+    positions = []
+    no_activity_positions = []
+    no_activity_labels = []
+    colors = ['#1f77b4', '#ff7f0e', '#2ca02c']  # Different color for each organism
+    
+    # Create figure
+    fig, ax = plt.subplots(figsize=(12, 6))
+    
+    # Process data for each organism
+    current_pos = 0
+    for org_idx, (organism, stats) in enumerate(statistics.items()):
+        # Skip S. aureus
+        if organism == 'S. aureus':
+            continue
+            
+        for comp_idx, composition in enumerate(stats.index):
+            # Get raw data for this composition
+            if organism == 'E. coli':
+                data = ecoli_inhibition.loc[:, composition]
+            else:  # C. albicans
+                data = calbicans_inhibition.loc[:, composition]
+            
+            # Format label with italic strain name
+            formatted_label = f"{composition}\n($\mathit{{{organism}}}$)"
+            
+            # Special case for C. albicans BPHB5%
+            if organism == 'C. albicans' and composition == 'BPHB5%':
+                all_data.append(data)
+                labels.append(formatted_label)
+                positions.append(current_pos)
+            else:
+                # Check if any value is negative for other cases
+                if (data <= 0).any():
+                    no_activity_positions.append(current_pos)
+                    no_activity_labels.append(formatted_label)
+                else:
+                    # Only include data if all values are positive
+                    all_data.append(data)
+                    labels.append(formatted_label)
+                    positions.append(current_pos)
+            
+            current_pos += 1
+        
+        # Add space between organisms
+        current_pos += 1
+    
+    # Create box plot without outliers
+    if all_data:  # Only create if there's data to plot
+        bp = ax.boxplot(all_data, positions=positions, patch_artist=True, showfliers=False)
+        
+        # Customize box plots and make lines thicker
+        for element in ['boxes', 'whiskers', 'fliers', 'means', 'medians', 'caps']:
+            plt.setp(bp[element], linewidth=2)
+            
+        for patch in bp['boxes']:
+            patch.set_facecolor('white')
+            patch.set_alpha(0.7)
+    
+    # Set all x-tick positions
+    all_positions = sorted(positions + no_activity_positions)
+    
+    # Create list of labels and their colors
+    all_labels = []
+    label_colors = []
+    for pos in all_positions:
+        if pos in positions:
+            idx = positions.index(pos)
+            all_labels.append(labels[idx])
+            label_colors.append('black')
+        else:
+            idx = no_activity_positions.index(pos)
+            all_labels.append(no_activity_labels[idx])
+            label_colors.append('red')
+    
+    # Customize plot
+    ax.set_xticks(all_positions)
+    # Set labels with their respective colors and larger font size
+    ax.set_xticklabels(all_labels, rotation=45, ha='right', fontsize=18)
+    for tick, color in zip(ax.get_xticklabels(), label_colors):
+        tick.set_color(color)
+        tick.set_fontsize(14)  # Explicitly set font size for each label
+    
+    ax.set_ylabel('Inhibition (%)', fontsize=22)
+    ax.set_title('Biofilm Inhibition Activity', fontsize=22)
+    
+    # Make axis lines thicker
+    ax.spines['left'].set_linewidth(2)
+    ax.spines['bottom'].set_linewidth(2)
+    ax.spines['top'].set_linewidth(2)
+    ax.spines['right'].set_linewidth(2)
+    
+    # Increase tick label size and thickness
+    ax.tick_params(axis='both', which='major', labelsize=14, width=2)
+    
+    # Set y-axis to start from 0
+    ymin, ymax = ax.get_ylim()
+    ax.set_ylim(bottom=0, top=ymax)
+    
+    # Add grid for better readability with thicker lines
+    ax.yaxis.grid(True, linestyle='--', alpha=0.7, linewidth=1.5)
+    
+    # Add zero line with increased thickness
+    ax.axhline(y=0, color='black', linestyle='-', linewidth=2)
+    
+    plt.tight_layout()
+    plt.show()
+
+filename = os.path.join(os.getcwd(), 'PhD_data', 'paper_3', 'Anti-biofilm_.ods')
 print("Attempting to open file:", filename)
 
 # Extract data from both sheets
 ecoli_data = extract_data(filename, 0)
 other_data = extract_data(filename, 1)
-
-# Print raw extracted data
-print("\nRaw extracted data for E. coli:")
-print(ecoli_data)
-print("\nRaw extracted data for S. aureus and C. albicans:")
-print(other_data)
 
 # Calculate biofilm inhibition for each organism
 ecoli_inhibition = calculate_biofilm_inhibition(ecoli_data.iloc[:, :6], '5')
@@ -78,50 +183,6 @@ statistics = {
     'C. albicans': calculate_statistics(calbicans_inhibition)
 }
 
-# Print statistics for all organisms
-print("\nStatistics for E. coli:")
-print(statistics['E. coli'])
-print("\nStatistics for S. aureus:")
-print(statistics['S. aureus'])
-print("\nStatistics for C. albicans:")
-print(statistics['C. albicans'])
-
-# Create figure
-fig = plt.figure(figsize=(20, 20))
-fig.suptitle('', fontsize=16)
-
-# Create GridSpec
-gs = GridSpec(2, 2, figure=fig, height_ratios=[1, 1], hspace=0.6, wspace=0.3)
-
-# Create subplots
-axes = [fig.add_subplot(gs[0, 0]),
-        fig.add_subplot(gs[0, 1]),
-        fig.add_subplot(gs[1, 0])]
-
-for ax, (organism, stats) in zip(axes, statistics.items()):
-    bars = ax.bar(stats.index, stats['mean'], yerr=stats['sem'], capsize=5)
-    
-    # Set title in italic and left-aligned
-    ax.set_title(f'$\it{{{organism}}}$', fontsize=14, loc='left')
-    
-    ax.set_xlabel('Composition', fontsize=12)
-    ax.set_ylabel('Inhibition (%)', fontsize=12)
-    
-    # Adjust y-axis to show negative values
-    y_min = min(0, stats['mean'].min() - stats['sem'].max())  # Lower bound
-    y_max = max(0, stats['mean'].max() + stats['sem'].max())  # Upper bound
-    ax.set_ylim(y_min * 1.2, y_max * 1.2)  # Add 20% padding
-    
-    ax.tick_params(axis='x', rotation=45)
-    
-    for bar in bars:
-        height = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2., height,
-                f'{height:.1f}%', ha='center', va='bottom' if height >= 0 else 'top')
-    
-    ax.axhline(y=0, color='black', linestyle='-', linewidth=0.5)
-
-plt.tight_layout()
-plt.show()
-
-print("\nThe subplots have been displayed.")
+# Only show the box plot visualization
+print("\nGenerating box plot visualization...")
+create_box_visualization(statistics)
