@@ -1,12 +1,12 @@
-#PhD Data Analysis Repository
+# PhD Data Analysis Repository
 
 Welcome to the PhD Data Analysis repository! This repository contains various scripts and tools for analyzing biological data, specifically focusing on Kaplan-Meier survival analysis and biofilm inhibition studies.
 
-##Overview
+## Overview
 
 This repository provides tools to perform Kaplan-Meier survival analysis on *C. elegans* lifespan data and analyze biofilm inhibition activity. The scripts are designed to be user-friendly, even for those with minimal programming experience.
 
-##Getting Started
+## Getting Started
 
 To get started with this repository, follow these steps:
 
@@ -23,25 +23,25 @@ To get started with this repository, follow these steps:
    pip install pandas lifelines matplotlib seaborn
    ```
 
-##Directory Structure
+## Directory Structure
 
 The repository is organized as follows:
 
 
-##Scripts and Tools
+## Scripts and Tools
 
-###Kaplan-Meier Analysis
+### Kaplan-Meier Analysis
 
 - **KaplanMeier_script.py**: This script performs Kaplan-Meier survival analysis on the provided data.
 - **Template.py**: Generates a CSV template for entering survival data.
 - **README_Kaplan-Meier Survival Analysis.md**: Instructions for using the Kaplan-Meier analysis tools.
 
-###Biofilm Inhibition Analysis
+### Biofilm Inhibition Analysis
 
 - **scripbiofilm.py**: Analyzes biofilm inhibition data and generates visualizations.
 - **scripbiofilm_alternative.py**: An alternative script for biofilm analysis with additional visualization options.
 
-###MIC Analysis
+### MIC Analysis
 
 - **MIC.py**: Analyzes Minimum Inhibitory Concentration (MIC) data and generates plots.
 
