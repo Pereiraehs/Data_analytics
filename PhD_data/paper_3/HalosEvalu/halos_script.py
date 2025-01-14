@@ -121,24 +121,37 @@ df = pd.DataFrame([
 ])
 
 # Create figure with publication-standard size and resolution
-plt.figure(figsize=(6, 5))  # Added dpi parameter
+plt.figure(figsize=(6, 5))
 
 # 1. Box plot
 plt.subplot(2, 1, 1)
-ax = sns.boxplot(data=df, x='Oil', y='Halo', hue='Bacteria', 
-                 palette={r'$\it{E. coli}$': 'lightgray', r'$\it{S. aureus}$': 'lightgray'},
-                 width=0.7,    # Standard width
-                 linewidth=1)  # Clear lines
+
+# Combine all data for the box plot
+sns.boxplot(data=df, x='Oil', y='Halo', hue='Bacteria', 
+            palette={r'$\it{E. coli}$': 'lightgray', 
+                     r'$\it{S. aureus}$': 'lightgray',
+                     r'$\it{E. coli}$ (Selected)': 'skyblue', 
+                     r'$\it{S. aureus}$ (Selected)': 'lightcoral'},
+            width=0.7,    # Standard width
+            linewidth=1)  # Clear lines
 
 # Add grid
-plt.grid(True, axis='y', linestyle='--', alpha=0.7)  # Add horizontal grid lines with dashed style
+plt.grid(True, axis='y', linestyle='--', alpha=0.7)
 
-# Highlight Cinnamon boxes
-cin_data = df[df['Oil'] == 'Cin']
-sns.boxplot(data=cin_data, x='Oil', y='Halo', hue='Bacteria',
-            palette={r'$\it{E. coli}$': 'skyblue', r'$\it{S. aureus}$': 'lightcoral'},
-            width=0.7,
-            linewidth=1)
+# Clear existing legend and add custom legend for highlighted Cinnamon boxes
+plt.legend().remove()  # Remove the existing legend
+
+# Create a custom legend for the highlighted boxes
+plt.legend(title=None, bbox_to_anchor=(1.05, 0.5),  # Adjusted position
+           loc='center left', fontsize=12, 
+           handletextpad=0.5,
+           handlelength=1.5,
+           labels=[r'$\it{E. coli}$', r'$\it{S. aureus}$', 
+                   r'$\it{E. coli}$ (Selected)', r'$\it{S. aureus}$ (Selected)'],  
+           handles=[plt.Line2D([0], [0], color='lightgray', lw=4),  
+                    plt.Line2D([0], [0], color='lightgray', lw=4),  
+                    plt.Line2D([0], [0], color='skyblue', lw=4),  
+                    plt.Line2D([0], [0], color='lightcoral', lw=4)])  
 
 plt.xlabel('Essential Oils', fontsize=16)
 plt.ylabel('Inhibition Zone (mm)', fontsize=16)
@@ -146,13 +159,7 @@ plt.title('A', pad=5, loc='left', fontsize=16)
 plt.xticks(fontsize=14)
 plt.yticks(fontsize=14)
 
-# Legend with standard formatting
-plt.legend(title=None, bbox_to_anchor=(1.01, 0.5), 
-          loc='center left', fontsize=12, 
-          handletextpad=0.5,
-          handlelength=1.5)
-
-# 2. Heatmap
+# 2. Heatmap (ensure this is below the box plot)
 plt.subplot(2, 1, 2)
 hm = sns.heatmap(heatmap_data, 
             annot=True,
@@ -168,7 +175,7 @@ plt.yticks(fontsize=16, rotation=0)
 
 # Adjust colorbar label and tick label sizes
 cbar = hm.collections[0].colorbar
-cbar.ax.tick_params(labelsize=16)  # Change this value to adjust the tick label size
+cbar.ax.tick_params(labelsize=16)  
 plt.gcf().axes[-1].yaxis.label.set_size(16)
 
 # Save with publication-quality settings

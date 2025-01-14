@@ -173,7 +173,7 @@ ax2.set_title('B', loc='left', pad=10)
 ax2.set_xlabel('Time (hours)')
 ax2.set_ylabel('Survival Probability (%)')
 ax2.grid(True)
-ax2.legend(title='Significant Groups*', loc='center left', bbox_to_anchor=(1, 0.5))
+ax2.legend(title='Significant Groups', loc='center left', bbox_to_anchor=(1, 0.5))
 format_y_axis_as_percentage(ax2)
 
 # Add a main title to the figure
